@@ -37,14 +37,22 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
     <Reference Include="TextBoxCurrency, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\ExternalLibraries\TextBoxCurrency\net462\TextBoxCurrency.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FrmConfirmarDoc.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmConfirmarDoc.Designer.cs">
+      <DependentUpon>FrmConfirmarDoc.cs</DependentUpon>
+    </Compile>
     <Compile Include="FrmConfirmarValor.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -78,6 +86,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="FrmConfirmarDoc.resx">
+      <DependentUpon>FrmConfirmarDoc.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FrmConfirmarValor.resx">
       <DependentUpon>FrmConfirmarValor.cs</DependentUpon>
     </EmbeddedResource>

@@ -33,16 +33,6 @@ namespace App.CliSiTef_DLL
         private TefConfig mTefConfig { get; set; }
         private Cupom mCupomVenda { get; set; }
 
-        private void ForceFocus(Control _control, bool _selectAll = false)
-        {
-            if (!DesignMode)
-            {
-                ActiveControl = _control;
-                if (_selectAll && _control is TextBoxBase)
-                    (_control as TextBoxBase).SelectAll();
-                _control.Focus();
-            }
-        }
         private void CarregarConfiguracao()
         {
             mTefConfig = new TefConfig
@@ -57,7 +47,7 @@ namespace App.CliSiTef_DLL
                 Tef_PinPadMensagem = ConfigurationManager.AppSettings["Tef_PinPadMensagem"],
                 Tef_PinPadVerificar = ConfigurationManager.AppSettings["Tef_PinPadVerificar"] == "1",
                 Tef_PinPadQrCode = ConfigurationManager.AppSettings["Tef_PinPadQrCode"] == "1",
-                Tef_SenhaCodigoSupervisor = ConvertHelper.ToInt32(ConfigurationManager.AppSettings["Tef_SenhaCodigoSupervisor"], 1234), 
+                Tef_SenhaCodigoSupervisor = ConvertHelper.ToInt32(ConfigurationManager.AppSettings["Tef_SenhaCodigoSupervisor"], 1234),
                 Tef_TipoComunicacaoExterna = ConfigurationManager.AppSettings["Tef_TipoComunicacaoExterna"]
             };
 
@@ -742,6 +732,7 @@ namespace App.CliSiTef_DLL
                                             cupom.DocumentoVinculado = item.Valor;
                                             break;
                                         case 802:
+                                            cupom.IdentificadorCupomPagamento = Convert.ToInt32(item.Valor);
                                             break;
                                         case 803:
                                             cupom.DataStr = item.Valor;
@@ -758,7 +749,6 @@ namespace App.CliSiTef_DLL
                                         default:
                                             break;
                                     }
-
                                 }
                             }
                             if (!string.IsNullOrWhiteSpace(cupom.DocumentoVinculado))
@@ -797,11 +787,118 @@ namespace App.CliSiTef_DLL
                                 break;
                         }
                         MessageBoxManager.Unregister();
-
                     }
                 }
             }
+            txtDocumentoVinculado.Text = "";
+            LimparRetornoTef();
+        }
+        private void btnTransacaoPendenteEspecifica_Click(object sender, EventArgs e)
+        {
+            string documentoVinculado = "";
+            using (FrmConfirmarDoc frm = new FrmConfirmarDoc())
+            {
+                frm.gTituloFormulario = "Documento Fiscal Vinculado";
+                frm.ShowDialog();
+                if (frm.DialogResult == DialogResult.OK)
+                    documentoVinculado = frm.gDocumentoTransacao;
+            }
+            if (string.IsNullOrWhiteSpace(documentoVinculado))
+                return;
 
+            if (mCupomVenda == null)
+            {
+                mCupomVenda = new Cupom
+                {
+                    TipoOperacao = "Fnc",
+                    DocumentoVinculado = documentoVinculado,
+                    ValorTotal = 0
+                };
+            }
+            mTefSoftwareExpress.gCupomVenda = mCupomVenda;
+
+            //Verificar Transações Pendentes Documento Específico
+            mTefSoftwareExpress.FuncaoExecutar(131, documentoVinculado);
+            if (mTefSoftwareExpress.gCupomVenda != null && mTefSoftwareExpress.gCupomVenda.Transacoes.Count > 0)
+            {
+                List<Cupom> lstCupons = new List<Cupom>();
+                foreach (TefTransacao itemTransacaoItem in mTefSoftwareExpress.gCupomVenda.Transacoes)
+                {
+                    TefRetorno obj = itemTransacaoItem.Retornos.Find(p => p.Codigo == 800);
+                    if (obj != null && Convert.ToInt32(obj.Valor) > 0)
+                    {
+                        var lstPendetes = itemTransacaoItem.Retornos.Where(p => p.Codigo >= 801 && p.Codigo <= 806).GroupBy(p => p.Indice).ToList();
+                        foreach (var itens in lstPendetes)
+                        {
+                            Cupom cupom = new Cupom();
+                            foreach (var item in itens.ToList())
+                            {
+                                if (item != null)
+                                {
+                                    switch (item.Codigo)
+                                    {
+                                        case 801:
+                                            cupom.DocumentoVinculado = item.Valor;
+                                            break;
+                                        case 802:
+                                            cupom.IdentificadorCupomPagamento = Convert.ToInt32(item.Valor);
+                                            break;
+                                        case 803:
+                                            cupom.DataStr = item.Valor;
+                                            break;
+                                        case 804:
+                                            cupom.HoraStr = item.Valor;
+                                            break;
+                                        case 805:
+                                            cupom.FuncaoCodigo = Convert.ToInt32(item.Valor);
+                                            break;
+                                        case 806:
+                                            cupom.ValorTotal = Convert.ToDecimal(item.Valor);
+                                            break;
+                                        default:
+                                            break;
+                                    }
+                                }
+                            }
+                            if (!string.IsNullOrWhiteSpace(cupom.DocumentoVinculado))
+                                lstCupons.Add(cupom);
+                        }
+                    }
+                }
+
+                if (lstCupons.Count > 0)
+                    MessageBox.Show("Existe(m) " + lstCupons.Count.ToString() + " pendente(s).", "T R A N S A Ç Ã O", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                else
+                    MessageBox.Show("Não existe transações pendentes para este documento", "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                foreach (Cupom item in lstCupons)
+                {
+                    if (item != null && item.ValorTotal > 0)
+                    {
+                        string cupomDados = "Referência: " + item.DocumentoVinculado + " - Operação: " + item.FuncaoDescricao + "\r\n";
+                        cupomDados += "Data/Hora: " + item.DataStr + " " + item.HoraStr + "\r\n";
+                        cupomDados += "Valor: " + item.ValorTotal.ToString("N2") + "\r\n\r\n";
+                        cupomDados += "Transação Pendente, o que deseja? ";
+
+                        MessageBoxManager.Yes = "&1-Confirmar";
+                        MessageBoxManager.No = "&2-Cancelar";
+                        MessageBoxManager.Cancel = "&3-Voltar";
+                        MessageBoxManager.Register();
+                        switch (MessageBox.Show(cupomDados, "Atenção", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1))
+                        {
+                            case DialogResult.No:
+                                mTefSoftwareExpress.CancelarTransacaoPendente(item.DocumentoVinculado);
+                                break;
+                            case DialogResult.Yes:
+                                mTefSoftwareExpress.ConfirmarTransacaoPendente(item.DocumentoVinculado);
+                                break;
+                            default:
+                                break;
+                        }
+                        MessageBoxManager.Unregister();
+                    }
+                }
+            }
             txtDocumentoVinculado.Text = "";
             LimparRetornoTef();
         }
@@ -1264,7 +1361,7 @@ namespace App.CliSiTef_DLL
         private void bkgInicioTef_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
         {
             if (mStatusTefInicio > 0)
-                ExibirMensagem(mTefSoftwareExpress.MensagemTef(mStatusTefInicio), 3000);
+                ExibirMensagem(mTefSoftwareExpress.MensagemTef(mStatusTefInicio), 2000);
             else
                 ExibirMensagem("TEF-SiTef inicializado com sucesso", 500);
             pnlBody.Enabled = mStatusTefInicio == 0;

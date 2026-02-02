@@ -32,6 +32,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmTelaTesteVenda));
             this.txtValorVenda = new TextBoxCurrency.TextBoxCurrency();
             this.pnlBody = new System.Windows.Forms.Panel();
+            this.btnTransacaoPendente = new System.Windows.Forms.Button();
             this.btnCpfCnpj2 = new System.Windows.Forms.Button();
             this.btnSenha4Dig = new System.Windows.Forms.Button();
             this.btnCpfCnpj1 = new System.Windows.Forms.Button();
@@ -67,7 +68,7 @@
             this.lblMensagem = new System.Windows.Forms.TextBox();
             this.bkgInicioTef = new System.ComponentModel.BackgroundWorker();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.btnTransacaoPendente = new System.Windows.Forms.Button();
+            this.btnTransacaoPendenteEspecifica = new System.Windows.Forms.Button();
             this.pnlBody.SuspendLayout();
             this.pnlQrCode.SuspendLayout();
             this.pnlTop.SuspendLayout();
@@ -89,6 +90,7 @@
             // 
             // pnlBody
             // 
+            this.pnlBody.Controls.Add(this.btnTransacaoPendenteEspecifica);
             this.pnlBody.Controls.Add(this.btnTransacaoPendente);
             this.pnlBody.Controls.Add(this.btnCpfCnpj2);
             this.pnlBody.Controls.Add(this.btnSenha4Dig);
@@ -122,6 +124,18 @@
             this.pnlBody.Name = "pnlBody";
             this.pnlBody.Size = new System.Drawing.Size(567, 336);
             this.pnlBody.TabIndex = 1;
+            // 
+            // btnTransacaoPendente
+            // 
+            this.btnTransacaoPendente.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnTransacaoPendente.Location = new System.Drawing.Point(87, 217);
+            this.btnTransacaoPendente.Name = "btnTransacaoPendente";
+            this.btnTransacaoPendente.Size = new System.Drawing.Size(126, 23);
+            this.btnTransacaoPendente.TabIndex = 27;
+            this.btnTransacaoPendente.Text = "TRN.PEND";
+            this.toolTip1.SetToolTip(this.btnTransacaoPendente, "Verificar Transações Pendentes (Função 130)");
+            this.btnTransacaoPendente.UseVisualStyleBackColor = true;
+            this.btnTransacaoPendente.Click += new System.EventHandler(this.btnTransacaoPendente_Click);
             // 
             // btnCpfCnpj2
             // 
@@ -509,17 +523,17 @@
             this.bkgInicioTef.DoWork += new System.ComponentModel.DoWorkEventHandler(this.bkgInicioTef_DoWork);
             this.bkgInicioTef.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.bkgInicioTef_RunWorkerCompleted);
             // 
-            // btnTransacaoPendente
+            // btnTransacaoPendenteEspecifica
             // 
-            this.btnTransacaoPendente.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnTransacaoPendente.Location = new System.Drawing.Point(87, 217);
-            this.btnTransacaoPendente.Name = "btnTransacaoPendente";
-            this.btnTransacaoPendente.Size = new System.Drawing.Size(75, 23);
-            this.btnTransacaoPendente.TabIndex = 27;
-            this.btnTransacaoPendente.Text = "TRN.PEND";
-            this.toolTip1.SetToolTip(this.btnTransacaoPendente, "Verificar Transações Pendentes");
-            this.btnTransacaoPendente.UseVisualStyleBackColor = true;
-            this.btnTransacaoPendente.Click += new System.EventHandler(this.btnTransacaoPendente_Click);
+            this.btnTransacaoPendenteEspecifica.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnTransacaoPendenteEspecifica.Location = new System.Drawing.Point(87, 246);
+            this.btnTransacaoPendenteEspecifica.Name = "btnTransacaoPendenteEspecifica";
+            this.btnTransacaoPendenteEspecifica.Size = new System.Drawing.Size(126, 23);
+            this.btnTransacaoPendenteEspecifica.TabIndex = 28;
+            this.btnTransacaoPendenteEspecifica.Text = "TRN.PEND.ESPECIF";
+            this.toolTip1.SetToolTip(this.btnTransacaoPendenteEspecifica, "Verificar Transações Pendentes (Função 131)");
+            this.btnTransacaoPendenteEspecifica.UseVisualStyleBackColor = true;
+            this.btnTransacaoPendenteEspecifica.Click += new System.EventHandler(this.btnTransacaoPendenteEspecifica_Click);
             // 
             // FrmTelaTesteVenda
             // 
@@ -590,6 +604,7 @@
         private System.Windows.Forms.Button btnSenha4Dig;
         private System.Windows.Forms.Button btnCpfCnpj2;
         private System.Windows.Forms.Button btnTransacaoPendente;
+        private System.Windows.Forms.Button btnTransacaoPendenteEspecifica;
     }
 }
 

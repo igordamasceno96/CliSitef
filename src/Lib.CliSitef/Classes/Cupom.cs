@@ -6,6 +6,7 @@ namespace Lib.CliSitef.Classes
     {
         public string TipoOperacao { get; set; }
         public string DocumentoVinculado { get; set; }
+        public int IdentificadorCupomPagamento { get; set; }
         public decimal ValorTotal { get; set; }
         public bool Cancelamento {  get; set; }
         public string DataStr { get; set; }
